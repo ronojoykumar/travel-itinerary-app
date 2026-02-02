@@ -9,6 +9,8 @@ import { Bot, Grid } from "lucide-react";
 import Link from "next/link";
 import { useTrip } from "@/hooks/useTrip";
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function LiveTripPage() {
     const { tripData, isLoaded } = useTrip();
@@ -49,6 +51,8 @@ export default function LiveTripPage() {
     // "Populate correctly... from the remaining stops in Day 1"
     const comingUpItems = itinerary.slice(nextItemIndex + 1).filter((item: any) => item.day === currentItem.day);
 
+    const router = useRouter();
+
     const handleNavigate = () => {
         if (nextItem) {
             setCurrentStepIndex(prev => prev + 1);
@@ -61,6 +65,11 @@ export default function LiveTripPage() {
         element?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push("/");
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 pb-32">
             <ActiveTripHeader
@@ -69,6 +78,7 @@ export default function LiveTripPage() {
                 date={currentItem.date || `Day ${currentItem.day}`}
                 onNavigate={handleNavigate}
                 onEmergency={handleEmergencyScroll}
+                onLogout={handleLogout}
             />
 
             <main className="container mx-auto px-4 pt-12 max-w-4xl relative z-0">
