@@ -50,7 +50,7 @@ export function TransportOptions({ destination }: TransportOptionsProps) {
     ];
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6 text-gray-900">
             <div className="flex items-center gap-3 mb-6">
                 <div className="bg-cyan-100 text-cyan-600 p-2 rounded-lg">
                     <Train size={24} />
@@ -70,10 +70,10 @@ export function TransportOptions({ destination }: TransportOptionsProps) {
                             key={option.id}
                             onClick={() => setSelected(option.id)}
                             className={`min-w-[200px] rounded-xl p-4 relative snap-center cursor-pointer transition-all border-2 ${isSelected
-                                    ? 'border-blue-600 bg-blue-50/50'
-                                    : option.aiPick
-                                        ? 'border-blue-200 bg-blue-50 shadow-sm'
-                                        : 'border-gray-100 bg-white hover:border-gray-200'
+                                ? 'border-blue-600 bg-blue-50/50'
+                                : option.aiPick
+                                    ? 'border-blue-200 bg-blue-50 shadow-sm'
+                                    : 'border-gray-100 bg-white hover:border-gray-200'
                                 }`}
                         >
                             {option.aiPick && (
@@ -112,8 +112,8 @@ export function TransportOptions({ destination }: TransportOptionsProps) {
                             </div>
 
                             <button className={`w-full py-2 rounded-lg text-xs font-bold transition-colors ${isSelected
-                                    ? 'bg-blue-600 text-white'
-                                    : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                ? 'bg-blue-600 text-white'
+                                : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
                                 }`}>
                                 {isSelected ? 'Selected' : `Select ${option.type}`}
                             </button>

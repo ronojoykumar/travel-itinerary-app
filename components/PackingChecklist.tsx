@@ -118,7 +118,7 @@ export function PackingChecklist({ destinations, startDate, endDate, tripType, i
     }
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mb-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mb-6 text-gray-900">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
                     <div className="bg-blue-100 text-blue-600 p-2 rounded-full">

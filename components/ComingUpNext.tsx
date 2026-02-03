@@ -18,7 +18,7 @@ export function ComingUpNext({ items }: ComingUpNextProps) {
     if (items.length === 0) return null;
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6 text-gray-900">
             <h3 className="font-bold text-lg mb-4">Coming Up Next</h3>
 
             <div className="space-y-4">

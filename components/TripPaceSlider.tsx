@@ -26,7 +26,7 @@ export function TripPaceSlider({ initialValue = 2, onChange }: TripPaceSliderPro
     };
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mt-6">
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mt-6 text-gray-900">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h3 className="font-bold text-lg">Trip Pace</h3>

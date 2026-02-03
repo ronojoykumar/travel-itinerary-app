@@ -56,7 +56,7 @@ export function WeatherForecast({ destinations, startDate, endDate }: WeatherFor
     };
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm h-full">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm h-full text-gray-900">
             <div className="flex items-center gap-3 mb-6">
                 <div className="bg-blue-50 text-blue-500 p-2 rounded-lg">
                     <CloudSun size={24} />

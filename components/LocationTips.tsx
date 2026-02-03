@@ -52,7 +52,7 @@ export function LocationTips({ location, destination, interests }: LocationTipsP
     }
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6 text-gray-900">
             <div className="flex items-center gap-3 mb-6">
                 <div className="bg-purple-100 text-purple-600 p-2 rounded-lg">
                     <MapPin size={24} />

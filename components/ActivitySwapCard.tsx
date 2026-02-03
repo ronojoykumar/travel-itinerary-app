@@ -70,7 +70,7 @@ export function ActivitySwapCard({ activity, destination, interests, budget, onS
     };
 
     return (
-        <div className={`bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-full transition-transform duration-300 ${isFlipping ? 'scale-95 opacity-50' : 'scale-100 opacity-100'}`}>
+        <div className={`bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-full transition-transform duration-300 ${isFlipping ? 'scale-95 opacity-50' : 'scale-100 opacity-100'} text-gray-900`}>
             <div>
                 <h4 className="font-bold text-md mb-2">{currentActivity.title}</h4>
                 {currentActivity.description && (

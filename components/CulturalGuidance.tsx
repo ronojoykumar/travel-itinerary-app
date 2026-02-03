@@ -46,7 +46,7 @@ export function CulturalGuidance({ destination }: CulturalGuidanceProps) {
     }
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mt-6 mb-8">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mt-6 mb-8 text-gray-900">
             <div className="flex items-center gap-3 mb-6">
                 <div className="bg-purple-100 text-purple-600 p-2 rounded-lg">
                     <Lightbulb size={24} />

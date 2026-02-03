@@ -21,7 +21,7 @@ export function BudgetSlider({ initialValue = 1500, onChange }: BudgetSliderProp
     };
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm text-gray-900">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h3 className="font-bold text-lg">Adjust Budget</h3>
