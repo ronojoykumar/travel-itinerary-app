@@ -94,10 +94,10 @@ export default function ChatPage() {
         handleSendMessage(text);
     };
 
-    if (!isLoaded) return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>;
+    if (!isLoaded) return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">Loading...</div>;
 
     return (
-        <div className="flex flex-col h-screen bg-gray-50">
+        <div className="flex flex-col h-screen bg-gray-50 text-gray-900">
             {/* Header */}
             <header className="bg-white border-b border-gray-100 p-4 flex items-center gap-4 sticky top-0 z-10 shadow-sm">
                 <Link href="/live" className="text-gray-500 hover:text-gray-900 transition-colors">

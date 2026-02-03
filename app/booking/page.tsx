@@ -54,14 +54,14 @@ export default function BookingPage() {
     }, [tripData]);
 
     if (!isLoaded || !tripData) {
-        return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>;
+        return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">Loading...</div>;
     }
 
     const budgetDifference = tripData.budget - totalCost;
     const isUnderBudget = budgetDifference >= 0;
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-32 relative overflow-hidden">
+        <div className="min-h-screen bg-gray-50 pb-32 relative overflow-hidden text-gray-900">
             {/* Watermark */}
             <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
                 <div className="text-gray-200 text-9xl font-bold -rotate-45 opacity-20 select-none whitespace-nowrap">

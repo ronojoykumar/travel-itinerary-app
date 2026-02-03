@@ -30,7 +30,7 @@ export default function CustomizePage() {
     }, [tripData]);
 
     if (!isLoaded || !tripData || !tripData.itinerary) {
-        return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>;
+        return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">Loading...</div>;
     }
 
     // Extract activities from itinerary
@@ -82,7 +82,7 @@ export default function CustomizePage() {
     const budgetChange = budget - (tripData.budget || 1500);
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-48">
+        <div className="min-h-screen bg-gray-50 pb-48 text-gray-900">
             <Header hideCta={true} />
 
             <main className="container mx-auto px-4 pt-32 max-w-4xl">

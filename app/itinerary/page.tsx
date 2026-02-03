@@ -146,7 +146,7 @@ export default function ItineraryPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white pb-24">
+        <div className="min-h-screen bg-white pb-24 text-slate-900">
             <UserHeader />
 
             {/* Extended Header Actions */}

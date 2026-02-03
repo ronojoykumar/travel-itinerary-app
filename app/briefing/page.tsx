@@ -13,11 +13,11 @@ export default function BriefingPage() {
     const { tripData, isLoaded } = useTrip();
 
     if (!isLoaded || !tripData) {
-        return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>;
+        return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">Loading...</div>;
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-32">
+        <div className="min-h-screen bg-gray-50 pb-32 text-gray-900">
             <Header hideCta={true} />
 
             <main className="container mx-auto px-4 pt-24 max-w-4xl">

@@ -75,7 +75,7 @@ export default function SetupPage() {
     if (!isLoaded) return <div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>;
 
     return (
-        <div className="min-h-screen bg-white pb-32">
+        <div className="min-h-screen bg-white pb-32 text-gray-900">
 
             <UserHeader />
 

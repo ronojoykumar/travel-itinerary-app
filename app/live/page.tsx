@@ -17,7 +17,7 @@ export default function LiveTripPage() {
     const [currentStepIndex, setCurrentStepIndex] = useState(-1); // -1 = Arrival/Airport
 
     if (!isLoaded || !tripData) {
-        return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>;
+        return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">Loading...</div>;
     }
 
     const { itinerary, destinations } = tripData;
@@ -33,7 +33,7 @@ export default function LiveTripPage() {
 
     // Safety check
     if (!currentItem && !isArrival) {
-        return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Trip Ended</div>;
+        return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">Trip Ended</div>;
     }
 
     const nextItemIndex = currentStepIndex + 1;
@@ -71,7 +71,7 @@ export default function LiveTripPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-32">
+        <div className="min-h-screen bg-gray-50 pb-32 text-gray-900">
             <ActiveTripHeader
                 dayNumber={currentItem.day}
                 title={currentItem.data.title || "Activity"}
