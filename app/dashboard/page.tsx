@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useTrip } from "@/hooks/useTrip";
@@ -71,7 +71,8 @@ function getTagColor(tag: string): string {
     return TAG_COLORS[tag] || "bg-gray-100 text-gray-700";
 }
 
-export default function DashboardPage() {
+// ── Inner component that safely uses useSearchParams ──────────────────────
+function DashboardInner() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { saveTrip } = useTrip();
@@ -341,5 +342,46 @@ export default function DashboardPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+// ── Skeleton shown while Suspense resolves ────────────────────────────────
+function DashboardSkeleton() {
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <div className="bg-gradient-to-br from-violet-600 to-pink-500 pb-16 pt-12 px-6">
+                <div className="max-w-lg mx-auto space-y-4">
+                    <div className="h-8 w-32 bg-white/20 rounded-xl animate-pulse" />
+                    <div className="h-10 w-64 bg-white/20 rounded-xl animate-pulse mx-auto" />
+                    <div className="mt-8 bg-white rounded-2xl p-5 flex items-center gap-4 shadow-xl">
+                        <div className="w-12 h-12 rounded-xl bg-gray-100 animate-pulse" />
+                        <div className="flex-1 space-y-2">
+                            <div className="h-5 w-32 bg-gray-100 rounded animate-pulse" />
+                            <div className="h-4 w-48 bg-gray-50 rounded animate-pulse" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="max-w-lg mx-auto px-4 py-8 space-y-4">
+                {[1, 2, 3].map(i => (
+                    <div key={i} className="bg-white rounded-2xl p-4 flex items-center gap-4 shadow-sm border border-gray-100">
+                        <div className="w-16 h-16 rounded-xl bg-gray-100 animate-pulse shrink-0" />
+                        <div className="flex-1 space-y-2">
+                            <div className="h-4 w-40 bg-gray-100 rounded animate-pulse" />
+                            <div className="h-3 w-32 bg-gray-50 rounded animate-pulse" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ── Public export – safe for static pre-rendering ─────────────────────────
+export default function DashboardPage() {
+    return (
+        <Suspense fallback={<DashboardSkeleton />}>
+            <DashboardInner />
+        </Suspense>
     );
 }

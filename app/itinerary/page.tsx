@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { ItineraryHero } from "@/components/itinerary/ItineraryHero"
 import { DaySelector } from "@/components/itinerary/DaySelector"
 import { TimelineItem } from "@/components/itinerary/TimelineItem"
@@ -15,7 +15,8 @@ import { useCurrencyRates, toINR, formatINR } from "@/hooks/useCurrencyRates"
 import { TransportOptions } from "@/components/itinerary/TransportOptions"
 import { MealItem } from "@/components/itinerary/MealItem"
 
-export default function ItineraryPage() {
+// Inner component — safely uses useSearchParams inside Suspense
+function ItineraryInner() {
     const { tripData, isLoaded, saveTrip } = useTrip()
     const { rates } = useCurrencyRates()
     const router = useRouter()
@@ -312,5 +313,28 @@ export default function ItineraryPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+// ── Skeleton fallback ─────────────────────────────────────────────────────
+function ItinerarySkeleton() {
+    return (
+        <div className="min-h-screen bg-gray-50 animate-pulse">
+            <div className="h-64 bg-gray-200" />
+            <div className="container mx-auto px-4 pt-6 max-w-4xl space-y-4">
+                {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="h-20 bg-white rounded-2xl border border-gray-100" />
+                ))}
+            </div>
+        </div>
+    )
+}
+
+// ── Public export – safe for Vercel static pre-rendering ──────────────────
+export default function ItineraryPage() {
+    return (
+        <Suspense fallback={<ItinerarySkeleton />}>
+            <ItineraryInner />
+        </Suspense>
     )
 }
