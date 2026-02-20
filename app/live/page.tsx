@@ -1,21 +1,24 @@
 "use client";
 
 import { ActiveTripHeader } from "@/components/ActiveTripHeader";
-import { TransportOptions } from "@/components/TransportOptions";
+import { TransportOptions, ItineraryTransportOption } from "@/components/TransportOptions";
 import { LocationTips } from "@/components/LocationTips";
 import { ComingUpNext } from "@/components/ComingUpNext";
 import { EmergencyContacts } from "@/components/EmergencyContacts";
-import { Bot, Grid } from "lucide-react";
+import { Bot } from "lucide-react";
 import Link from "next/link";
 import { useTrip } from "@/hooks/useTrip";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
 export default function LiveTripPage() {
+    // ✅ ALL hooks must be called unconditionally at the top
     const { tripData, isLoaded } = useTrip();
     const [currentStepIndex, setCurrentStepIndex] = useState(-1); // -1 = Arrival/Airport
+    const router = useRouter();
 
+    // ✅ Early returns AFTER all hooks
     if (!isLoaded || !tripData) {
         return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">Loading...</div>;
     }
@@ -41,17 +44,28 @@ export default function LiveTripPage() {
 
     // Next location for Transport & Tips
     const nextLocationTitle = nextItem?.data?.title || "End of Trip";
-    const nextLocationArea = nextItem?.data?.location || currentDestination;
 
-    // Remaining items for "Coming Up Next"
-    // Filter items starting from the ONE AFTER the target of transport
-    // i.e., if I am at Arrival, Transport is to Item 0. Coming Up is Item 1...
-    // WAIT. "Coming Up Next" usually shows what's AFTER the immediate next step.
-    // Or does it show the immediate next step too?
-    // "Populate correctly... from the remaining stops in Day 1"
     const comingUpItems = itinerary.slice(nextItemIndex + 1).filter((item: any) => item.day === currentItem.day);
 
-    const router = useRouter();
+    // ── Extract transport options for the current→next leg ───────────────────
+    // Look for a transportOptions item on the same day, at or after the current step
+    const currentDay = currentItem?.day ?? 1;
+    const transportItem = itinerary
+        .slice(Math.max(0, currentStepIndex))          // from current position onwards
+        .find((it: any) => it.type === "transportOptions" && it.day === currentDay)
+        ?? itinerary.find((it: any) => it.type === "transportOptions" && it.day === currentDay); // fallback: any on same day
+
+    const itineraryTransportOptions: ItineraryTransportOption[] | undefined =
+        transportItem?.data?.options?.map((o: any) => ({
+            type: o.type ?? "cab",
+            provider: o.provider,
+            duration: o.duration ? `${o.duration} min` : undefined,
+            price: o.price,
+            frequency: o.frequency,
+        }));
+
+    const transportFrom: string = transportItem?.data?.from ?? currentItem?.data?.location ?? "";
+    const transportTo: string = transportItem?.data?.to ?? nextItem?.data?.location ?? nextLocationTitle;
 
     const handleNavigate = () => {
         if (nextItem) {
@@ -82,19 +96,18 @@ export default function LiveTripPage() {
             />
 
             <main className="container mx-auto px-4 pt-12 max-w-4xl relative z-0">
-                {/* 
-                    Transport: To the *Next* Location.
-                    If Arrival (-1), show transport to Item 0. 
-                */}
                 {nextItem ? (
-                    <TransportOptions destination={nextLocationTitle} />
+                    <TransportOptions
+                        destination={transportTo || nextLocationTitle}
+                        from={transportFrom}
+                        itineraryOptions={itineraryTransportOptions}
+                    />
                 ) : (
                     <div className="bg-green-50 p-6 rounded-2xl border border-green-100 mb-6 text-center text-green-800 font-bold">
                         You've reached the end of your trip!
                     </div>
                 )}
 
-                {/* Tips for the *Next* Location (where we are going) */}
                 {nextItem && (
                     <LocationTips
                         location={nextLocationTitle}

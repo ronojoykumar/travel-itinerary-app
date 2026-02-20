@@ -42,7 +42,7 @@ export function PackingChecklist({ destinations, startDate, endDate, tripType, i
 
             if (response.ok) {
                 const data = await response.json();
-                // Flatten categories into items
+                // Flatten categories into items — max 20 most important
                 let id = 1;
                 const allItems: ChecklistItem[] = [];
                 data.categories?.forEach((category: any) => {
@@ -50,7 +50,7 @@ export function PackingChecklist({ destinations, startDate, endDate, tripType, i
                         allItems.push({ id: id++, label: item, checked: false });
                     });
                 });
-                setItems(allItems);
+                setItems(allItems.slice(0, 20)); // cap at 20
             }
         } catch (error) {
             console.error('Failed to fetch checklist:', error);

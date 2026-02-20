@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Loader2, Plane, Map as MapIcon, Calendar, CheckCircle } from "lucide-react"
 import { useTrip } from "@/hooks/useTrip"
+import { supabase } from "@/lib/supabase"
 
 export default function ProcessingPage() {
     const { tripData, saveTrip, isLoaded } = useTrip()
@@ -38,6 +39,26 @@ export default function ProcessingPage() {
 
         const generate = async () => {
             try {
+                // Usage guard: check monthly limit unless coupon bypass is active
+                const bypassed = sessionStorage.getItem("paywall_bypass") === "true";
+                if (!bypassed) {
+                    const { data: authCheck } = await supabase.auth.getUser();
+                    if (authCheck?.user) {
+                        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+                        const { count } = await supabase
+                            .from("saved_itineraries")
+                            .select("id", { count: "exact", head: true })
+                            .eq("user_id", authCheck.user.id)
+                            .gte("created_at", startOfMonth);
+
+                        if ((count || 0) >= 5) {
+                            // Redirect back to dashboard which will show the paywall
+                            router.push("/dashboard?paywall=true");
+                            return;
+                        }
+                    }
+                }
+
                 const response = await fetch('/api/generate-itinerary', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -54,7 +75,28 @@ export default function ProcessingPage() {
 
                 const data = await response.json();
                 if (data.itinerary) {
+                    const updatedTripData = { ...tripData, itinerary: data.itinerary };
                     saveTrip({ itinerary: data.itinerary });
+
+                    // Save to Supabase in the background (don't block navigation)
+                    try {
+                        const { data: authData } = await supabase.auth.getSession();
+                        if (authData?.session) {
+                            await fetch('/api/save-itinerary', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    userId: authData.session.user.id,
+                                    accessToken: authData.session.access_token,
+                                    tripData: updatedTripData,
+                                }),
+                            });
+                        }
+                    } catch (saveError) {
+                        // Non-fatal: log but don't block the user
+                        console.error("Failed to save itinerary to cloud:", saveError);
+                    }
+
                     router.push("/itinerary");
                 } else {
                     console.error("No itinerary returned");

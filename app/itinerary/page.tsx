@@ -5,17 +5,24 @@ import { ItineraryHero } from "@/components/itinerary/ItineraryHero"
 import { DaySelector } from "@/components/itinerary/DaySelector"
 import { TimelineItem } from "@/components/itinerary/TimelineItem"
 import { TransportItem } from "@/components/itinerary/TransportItem"
-import { ArrowRight, ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { LocationBanner } from "@/components/itinerary/LocationBanner"
+import { ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { UserHeader } from "@/components/UserHeader"
 import { useTrip } from "@/hooks/useTrip"
+import { useCurrencyRates, toINR, formatINR } from "@/hooks/useCurrencyRates"
 import { TransportOptions } from "@/components/itinerary/TransportOptions"
 import { MealItem } from "@/components/itinerary/MealItem"
 
 export default function ItineraryPage() {
     const { tripData, isLoaded, saveTrip } = useTrip()
+    const { rates } = useCurrencyRates()
+    const router = useRouter()
+    const searchParams = useSearchParams()
     const [selectedDay, setSelectedDay] = useState(0)
     const [days, setDays] = useState<{ day: string; date: string }[]>([])
+    const [showSavedToast, setShowSavedToast] = useState(false)
 
     // Selection state
     const [transportSelections, setTransportSelections] = useState<Record<string, any>>({})
@@ -43,6 +50,25 @@ export default function ItineraryPage() {
 
             setDays(dayList)
         }
+
+        // Auto-select the most practical transport option for every route
+        // "Most practical" = the cheapest option (best value for the traveller).
+        // Only seed selections that haven't been manually chosen yet.
+        if (tripData?.itinerary) {
+            const autoSelections: Record<string, any> = {}
+            tripData.itinerary.forEach((item: any) => {
+                if (item.type === "transportOptions" && item.data?.options?.length > 0) {
+                    const key = `${item.day}-${item.data.from}-${item.data.to}`
+                    // Pick cheapest option
+                    const cheapest = [...item.data.options].sort(
+                        (a: any, b: any) => (a.price ?? 0) - (b.price ?? 0)
+                    )[0]
+                    autoSelections[key] = cheapest
+                }
+            })
+            // Merge: only set keys that user hasn't already touched
+            setTransportSelections(prev => ({ ...autoSelections, ...prev }))
+        }
     }, [tripData])
 
     if (!isLoaded || !tripData) return null
@@ -68,38 +94,35 @@ export default function ItineraryPage() {
     const currentDayNum = selectedDay + 1
     const schedule = tripData.itinerary?.filter(item => item.day === currentDayNum) || []
 
-    // Calculate total cost across ALL days
+    // Calculate total cost across ALL days, converted to INR
     const calculateTotalCost = () => {
-        let total = 0;
-
-        // Get all itinerary items (not just current day)
+        let totalUsd = 0;
         const allItems = tripData.itinerary || [];
 
-        // Add activity costs
         allItems.forEach(item => {
             if (item.type === "activity" && item.data.price) {
                 const priceStr = item.data.price.toString();
                 const numPrice = parseFloat(priceStr.replace(/[^0-9.]/g, ''));
-                if (!isNaN(numPrice)) total += numPrice;
+                if (!isNaN(numPrice)) totalUsd += numPrice;
             }
         });
 
-        // Add selected transport costs
         Object.values(transportSelections).forEach((selection: any) => {
-            if (selection?.price) total += selection.price;
+            if (selection?.price) totalUsd += selection.price;
         });
 
-        // Add selected meal costs
         allItems.forEach(item => {
             if (item.type === "meal") {
                 const mealKey = `${item.day}-${item.data.mealType}`;
                 if (mealSelections[mealKey] && item.data.price) {
-                    total += item.data.price;
+                    totalUsd += item.data.price;
                 }
             }
         });
 
-        return Math.round(total);
+        // Convert total to INR using USD rate
+        const inrTotal = toINR(totalUsd, rates);
+        return formatINR(inrTotal);
     };
 
     // Copy itinerary to clipboard
@@ -146,8 +169,20 @@ export default function ItineraryPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white pb-24 text-slate-900">
+        <div className="min-h-screen pb-24 text-slate-900" style={{ backgroundColor: "#F8F9FA" }}>
             <UserHeader />
+
+            {/* Changes-saved toast (shown after returning from customize) */}
+            {showSavedToast && (
+                <div
+                    className="fixed top-5 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2.5 px-5 py-3 rounded-2xl shadow-xl text-white text-sm font-bold animate-fade-in"
+                    style={{ background: "linear-gradient(135deg,#00B894,#55efc4)", boxShadow: "0 8px 24px rgba(0,184,148,0.35)" }}
+                >
+                    <CheckCircle2 className="h-4.5 w-4.5" />
+                    Changes saved! Heading to booking…
+                </div>
+            )}
+
 
             {/* Extended Header Actions */}
             <div className="fixed top-4 left-4 z-50">
@@ -172,15 +207,12 @@ export default function ItineraryPage() {
             />
 
             <div className="p-4 max-w-lg mx-auto">
-                <div className="space-y-2 mt-4">
-                    <div className="flex justify-between items-center px-2 pb-2">
-                        <h2 className="text-lg font-bold text-slate-900">
-                            {selectedDay === 0 ? "Arrival" : `Exploring ${tripData.destinations[0].split(",")[0]}`}
-                        </h2>
-                        <span className="text-[10px] font-bold bg-indigo-100 text-indigo-600 px-2 py-1 rounded uppercase tracking-wider">
-                            {tripData.tripType}
-                        </span>
-                    </div>
+                <div className="space-y-1 mt-4">
+                    {/* Dynamic country-aware banner */}
+                    <LocationBanner
+                        dayItems={schedule}
+                        dayNumber={selectedDay + 1}
+                    />
 
                     {schedule.length > 0 ? (
                         schedule.map((item, i) => {
@@ -197,6 +229,7 @@ export default function ItineraryPage() {
                                         onSelect={(option) => {
                                             setTransportSelections(prev => ({ ...prev, [key]: option }));
                                         }}
+                                        rates={rates}
                                     />
                                 );
                             }
@@ -218,6 +251,7 @@ export default function ItineraryPage() {
                                                 [mealKey]: !prev[mealKey]
                                             }));
                                         }}
+                                        rates={rates}
                                     />
                                 );
                             }
@@ -232,8 +266,11 @@ export default function ItineraryPage() {
 
                             // Render activities
                             return (
-                                // @ts-ignore
-                                <TimelineItem key={i} {...item.data} />
+                                <TimelineItem
+                                    key={i}
+                                    {...item.data}
+                                    rates={rates}
+                                />
                             );
                         })
                     ) : (
@@ -244,16 +281,31 @@ export default function ItineraryPage() {
                 </div>
             </div>
 
-            {/* Floating CTA */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 z-50">
-                <div className="max-w-lg mx-auto flex items-center justify-between gap-4">
+            {/* Glassmorphism Booking Bar */}
+            <div
+                className="fixed bottom-0 left-0 right-0 z-50"
+                style={{
+                    background: "rgba(255, 255, 255, 0.72)",
+                    backdropFilter: "blur(20px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                    borderTop: "1px solid rgba(255,255,255,0.6)",
+                    boxShadow: "0 -8px 32px rgba(0,0,0,0.06)",
+                }}
+            >
+                <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between gap-4">
                     <div className="flex flex-col">
-                        <span className="text-xs text-slate-500 font-medium">ESTIMATED COST</span>
-                        <span className="text-xl font-bold text-slate-900">${calculateTotalCost()}</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Est. Cost</span>
+                        <span className="text-2xl font-black text-slate-900 tracking-tight">{calculateTotalCost()}</span>
                     </div>
-                    <Link href="/booking" className="flex-1">
-                        <button className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
-                            Review & Book
+                    <Link href="/customize" className="flex-1">
+                        <button
+                            className="w-full text-white font-bold py-3.5 rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                            style={{
+                                background: "linear-gradient(135deg, #6C5CE7 0%, #a78bfa 100%)",
+                                boxShadow: "0 4px 20px rgba(108, 92, 231, 0.35)",
+                            }}
+                        >
+                            Customize & Book
                             <ArrowRight className="h-4 w-4" />
                         </button>
                     </Link>

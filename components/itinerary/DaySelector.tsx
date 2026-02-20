@@ -11,8 +11,8 @@ interface DaySelectorProps {
 
 export function DaySelector({ days, selectedDay, onSelect }: DaySelectorProps) {
     return (
-        <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100 overflow-x-auto no-scrollbar py-3 px-4">
-            <div className="flex gap-3 min-w-max">
+        <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-100/80 overflow-x-auto no-scrollbar">
+            <div className="flex gap-2 min-w-max px-4 py-3">
                 {days.map((day, index) => {
                     const isSelected = selectedDay === index
                     return (
@@ -20,21 +20,30 @@ export function DaySelector({ days, selectedDay, onSelect }: DaySelectorProps) {
                             key={index}
                             onClick={() => onSelect(index)}
                             className={cn(
-                                "relative flex flex-col items-center justify-center min-w-[4.5rem] py-2 px-3 rounded-2xl transition-all duration-300",
+                                "relative flex flex-col items-center justify-center min-w-[4rem] py-2.5 px-4 rounded-2xl transition-all duration-300 select-none",
                                 isSelected
-                                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 ring-2 ring-indigo-100 ring-offset-1"
-                                    : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-100"
+                                    ? "text-white"
+                                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
                             )}
+                            style={isSelected ? {
+                                background: "linear-gradient(135deg, #6C5CE7 0%, #a78bfa 100%)",
+                                boxShadow: "0 4px 20px rgba(108, 92, 231, 0.35), 0 0 0 1px rgba(108,92,231,0.15)",
+                            } : {}}
                         >
-                            <span className={cn("text-xs font-medium mb-0.5", isSelected ? "text-white/80" : "text-slate-400")}>
+                            <span className={cn(
+                                "text-[10px] font-semibold uppercase tracking-widest mb-0.5",
+                                isSelected ? "text-white/70" : "text-slate-400"
+                            )}>
                                 {day.day}
                             </span>
-                            <span className="text-lg font-bold leading-none">{day.date}</span>
+                            <span className="text-base font-bold leading-none">{day.date}</span>
 
+                            {/* Animated bottom dot indicator */}
                             {isSelected && (
                                 <motion.div
-                                    layoutId="activeDayIndicator"
-                                    className="absolute -bottom-1 w-1 h-1 bg-white rounded-full"
+                                    layoutId="dayPill"
+                                    className="absolute -bottom-1.5 w-1 h-1 rounded-full bg-violet-500"
+                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                 />
                             )}
                         </button>
