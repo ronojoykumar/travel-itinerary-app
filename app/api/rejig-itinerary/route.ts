@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { parseItineraryResponse } from '@/lib/json-parser';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(req: Request) {
     try {
@@ -45,10 +44,14 @@ export async function POST(req: Request) {
             model: "gpt-4o",
         });
 
-        const content = completion.choices[0].message.content?.trim() || '[]';
-        const updatedItinerary = JSON.parse(content);
+        const content = completion.choices[0].message.content ?? '';
+        const result = parseItineraryResponse(content);
 
-        return NextResponse.json({ itinerary: updatedItinerary });
+        if (result.error === 'REGEN_REQUIRED') {
+            return NextResponse.json(result, { status: 500 });
+        }
+
+        return NextResponse.json({ itinerary: result.itinerary });
     } catch (error) {
         console.error('Error rejigging itinerary:', error);
         return NextResponse.json(
